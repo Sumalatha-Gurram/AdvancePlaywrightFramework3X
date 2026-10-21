@@ -1,0 +1,13 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/tta-report/
+/reports/runs/
+/playwright/.cache/
+/playwright/.auth/
+
+# Local environment variables
+.env
