@@ -1,4 +1,5 @@
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { requireEnv } from '../config/env';
 
 export type LLMProvider = 'groq' | 'openrouter' | 'openai' | 'anthropic' | 'deepseek';
@@ -39,6 +40,27 @@ function getProvider(provider?: LLMProvider): LLMProvider {
             throw new Error(
                 `Unsupported LLM_PROVIDER "${value}". Choose groq, openrouter, openai, anthropic, or deepseek.`,
             );
+    }
+}
+
+export function isLLMConfigured(): boolean {
+    if (!process.env.LLM_MODEL?.trim()) {
+        return false;
+    }
+
+    switch (process.env.LLM_PROVIDER?.trim().toLowerCase()) {
+        case 'groq':
+            return Boolean(process.env.GROQ_API_KEY?.trim());
+        case 'openrouter':
+            return Boolean(process.env.OPENROUTER_API_KEY?.trim());
+        case 'openai':
+            return Boolean(process.env.OPENAI_API_KEY?.trim());
+        case 'anthropic':
+            return Boolean(process.env.ANTHROPIC_API_KEY?.trim());
+        case 'deepseek':
+            return Boolean(process.env.DEEPSEEK_API_KEY?.trim());
+        default:
+            return false;
     }
 }
 
@@ -179,6 +201,7 @@ export async function generateJsonFile(
     options: LLMOptions = {},
 ): Promise<unknown> {
     const result = await generateJson(prompt, options);
+    await mkdir(dirname(outputPath), { recursive: true });
     await writeFile(outputPath, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
     return result;
 }
